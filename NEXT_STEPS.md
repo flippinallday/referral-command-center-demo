@@ -16,6 +16,8 @@
    - Run `supabase-schema.sql`
    - Create one test facility
    - Add auth users and profile rows
+   - In the app, open the **Supabase** section and paste Project URL, anon key, and facility ID
+   - Click **Save + Connect**, then **Sign in**
 
 2. **Frontend migration**
    - Move from static HTML/localStorage to Next.js or React/Vite

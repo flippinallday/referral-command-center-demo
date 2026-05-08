@@ -16,6 +16,7 @@
     <a href="#lost">Lost Log</a>
     <a href="#ai">AI Summary</a>
     <a href="#report">Daily Report</a>
+    <a href="#settings">Supabase</a>
   </aside>
 
   <main>
@@ -89,6 +90,23 @@
       </article>
     </section>
 
+    <section id="settings" class="panel">
+      <div class="head"><h2>Supabase Connection</h2><span id="connectionStatus" class="pill low">Local demo mode</span></div>
+      <p class="muted">Paste your Supabase Project URL, anon public key, and facility ID. The app will switch from browser storage to your Supabase database.</p>
+      <form id="supabaseForm" class="form">
+        <label class="wide">Supabase Project URL <input id="supabaseUrl" placeholder="https://xxxx.supabase.co" /></label>
+        <label class="wide">Supabase anon public key <input id="supabaseAnon" placeholder="eyJhbGciOi..." /></label>
+        <label>Facility ID <input id="facilityId" placeholder="UUID from facilities table" /></label>
+        <label>Email for login <input id="loginEmail" type="email" placeholder="you@example.com" /></label>
+        <label>Password <input id="loginPassword" type="password" placeholder="Supabase Auth password" /></label>
+        <div class="wide form-actions">
+          <button id="saveSupabase" type="button">Save + Connect</button>
+          <button id="signInSupabase" type="button">Sign in</button>
+          <button id="clearSupabase" type="button" class="secondary">Use local demo mode</button>
+        </div>
+      </form>
+    </section>
+
     <section class="grid two">
       <article id="lost" class="panel">
         <h2>Lost Referral Log</h2>
@@ -116,6 +134,7 @@
     </form>
   </dialog>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 </body>
 </html>
