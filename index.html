@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Referral Command Center — SNF MVP</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <aside>
+    <div class="brand">ReferralCC</div>
+    <a href="#dashboard" class="active">Dashboard</a>
+    <a href="#intake">Intake</a>
+    <a href="#referrals">Referrals</a>
+    <a href="#followups">Follow-Ups</a>
+    <a href="#lost">Lost Log</a>
+    <a href="#ai">AI Summary</a>
+    <a href="#report">Daily Report</a>
+  </aside>
+
+  <main>
+    <section id="dashboard" class="hero panel">
+      <div>
+        <p class="eyebrow">SNF admissions MVP</p>
+        <h1>Never lose a Medicare referral in the shuffle.</h1>
+        <p class="lead">Manual-first referral intake, follow-up reminders, lost-reason tracking, high-value flags, and a daily leadership report.</p>
+      </div>
+      <button id="seedBtn" class="secondary">Load fake test referrals</button>
+    </section>
+
+    <section class="metrics">
+      <article><span id="mTotal">0</span><small>Total today</small></article>
+      <article><span id="mAccepted">0</span><small>Accepted</small></article>
+      <article><span id="mPending">0</span><small>Pending risk</small></article>
+      <article><span id="mLost">0</span><small>Lost</small></article>
+      <article><span id="mMedicare">0</span><small>Medicare / MA</small></article>
+      <article><span id="mResponse">0m</span><small>Avg response</small></article>
+    </section>
+
+    <section class="grid two">
+      <article id="intake" class="panel">
+        <h2>Referral Intake</h2>
+        <form id="intakeForm" class="form">
+          <label>Patient initials <input id="patient" placeholder="J.S." required /></label>
+          <label>Referral source <input id="source" placeholder="Henry Mayo" required /></label>
+          <label>Hospital contact <input id="contact" placeholder="Case manager name / phone" /></label>
+          <label>Payer
+            <select id="payer"><option>Medicare</option><option>Medicare Advantage</option><option>HMO</option><option>Medi-Cal</option><option>Private Pay</option><option>Other</option></select>
+          </label>
+          <label>Diagnosis <input id="diagnosis" placeholder="Hip fracture" required /></label>
+          <label>Skilled need <input id="need" placeholder="PT/OT, wound care, IV antibiotics" /></label>
+          <label>Requested admit date <input id="admitDate" type="date" /></label>
+          <label>Status
+            <select id="status"><option>New Referral</option><option>Under Clinical Review</option><option>Need More Info</option><option>Accepted</option><option>Pending Auth</option><option>Admitted</option><option>Lost / Declined</option></select>
+          </label>
+          <label>Assigned to <input id="assigned" placeholder="Admissions Coordinator" /></label>
+          <label>Next follow-up <input id="followup" type="datetime-local" /></label>
+          <label class="wide">Missing documents <input id="missing" placeholder="PT notes, H&P, MAR, wound photos..." /></label>
+          <label class="wide">Notes <textarea id="notes" placeholder="Waiting for auth..."></textarea></label>
+          <button class="wide">Save Referral</button>
+        </form>
+      </article>
+
+      <article id="ai" class="panel">
+        <h2>AI Referral Summary</h2>
+        <p class="muted">Paste referral notes. This organizes the referral only — it does not make clinical acceptance decisions.</p>
+        <textarea id="aiNotes" class="aiBox" placeholder="Paste referral packet notes here..."></textarea>
+        <button id="summarizeBtn">Summarize Referral</button>
+        <pre id="aiOutput" class="summary">Referral Summary will appear here.</pre>
+      </article>
+    </section>
+
+    <section class="grid two">
+      <article id="referrals" class="panel">
+        <div class="head"><h2>Referral Pipeline</h2><select id="filter"><option>All</option><option>New Referral</option><option>Under Clinical Review</option><option>Need More Info</option><option>Accepted</option><option>Pending Auth</option><option>Admitted</option><option>Lost / Declined</option></select></div>
+        <div id="referralList" class="list"></div>
+      </article>
+      <article id="followups" class="panel">
+        <h2>Urgent Follow-Ups</h2>
+        <div id="followupList" class="list compact"></div>
+      </article>
+    </section>
+
+    <section class="grid two">
+      <article id="lost" class="panel">
+        <h2>Lost Referral Log</h2>
+        <p class="muted">Lost referrals must have a reason. This is where leadership sees the real bottleneck.</p>
+        <div id="lostList" class="list compact"></div>
+      </article>
+      <article id="report" class="panel">
+        <div class="head"><h2>Daily Leadership Report</h2><button id="copyReport">Copy report</button></div>
+        <pre id="dailyReport" class="summary"></pre>
+      </article>
+    </section>
+  </main>
+
+  <dialog id="lostDialog">
+    <form method="dialog">
+      <h2>Lost Reason Required</h2>
+      <input type="hidden" id="lostId" />
+      <label>Lost reason
+        <select id="lostReason">
+          <option>No bed available</option><option>Insurance not accepted</option><option>Auth delay</option><option>Clinically declined</option><option>Family chose another facility</option><option>Hospital sent elsewhere</option><option>No response fast enough</option><option>Staffing concern</option><option>Other</option>
+        </select>
+      </label>
+      <label>Notes <textarea id="lostNotes"></textarea></label>
+      <menu><button value="cancel" class="secondary">Cancel</button><button id="saveLost" value="default">Save Lost Reason</button></menu>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
