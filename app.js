@@ -7,7 +7,7 @@ const defaultSupabase={
 const statuses=['New Referral','Under Clinical Review','Need More Info','Accepted','Pending Auth','Admitted','Lost / Declined'];
 let data=[];
 let sb=null;
-let cfg={...defaultSupabase,...JSON.parse(localStorage.getItem(cfgKey)||'{}')};
+let cfg=readConfig();
 
 const sample=[
  {id:1,patient:'J.S.',source:'Henry Mayo',contact:'CM Sarah',received:new Date(Date.now()-2.3*3600000).toISOString(),payer:'Medicare',diagnosis:'Hip fracture',need:'PT/OT skilled rehab',admitDate:todayPlus(1),status:'Pending Auth',assigned:'Admissions Coordinator',followup:dtLocal(Date.now()-20*60000),missing:'Auth approval',notes:'Strong ortho-to-home candidate',responseMinutes:18,priority:'High Priority'},
@@ -17,8 +17,16 @@ const sample=[
  {id:5,patient:'T.B.',source:'Hospital B',contact:'',received:new Date(Date.now()-5*3600000).toISOString(),payer:'Medi-Cal',diagnosis:'Custodial placement',need:'Long-term care',admitDate:todayPlus(3),status:'Lost / Declined',assigned:'Admissions Coordinator',followup:'',missing:'',notes:'Out of scope for skilled push',responseMinutes:80,priority:'Low Priority',lostReason:'Payer issue'}
 ];
 
+function readConfig(){
+  const stored=JSON.parse(localStorage.getItem(cfgKey)||'{}');
+  return {
+    url:stored.url||defaultSupabase.url,
+    anon:stored.anon||defaultSupabase.anon,
+    facilityId:stored.facilityId||''
+  };
+}
 function initSupabase(){
-  cfg={...defaultSupabase,...JSON.parse(localStorage.getItem(cfgKey)||'{}')};
+  cfg=readConfig();
   if(cfg.url&&cfg.anon&&window.supabase){sb=window.supabase.createClient(cfg.url,cfg.anon)}
   document.getElementById('supabaseUrl').value=cfg.url||'';
   document.getElementById('supabaseAnon').value=cfg.anon||'';
@@ -36,7 +44,7 @@ function setConnectionStatus(extra=''){
 async function load(){
   if(usingSupabase()){
     const {data:rows,error}=await sb.from('referrals').select('*').eq('facility_id',cfg.facilityId).order('received_at',{ascending:false});
-    if(error){console.error(error);setConnectionStatus('load failed');data=[];render();return}
+    if(error){console.error(error);setConnectionStatus('load failed: '+error.message);data=[];render();return}
     data=(rows||[]).map(fromDb);
   } else data=JSON.parse(localStorage.getItem(key)||'[]');
   render();
@@ -109,7 +117,7 @@ document.getElementById('cancelEdit').onclick=()=>resetForm(document.getElementB
 document.getElementById('exportCsv').onclick=()=>downloadCsv();
 document.getElementById('copyReport').onclick=async()=>{await navigator.clipboard.writeText(report());document.getElementById('copyReport').textContent='Copied';setTimeout(()=>document.getElementById('copyReport').textContent='Copy report',1200)};
 document.getElementById('summarizeBtn').onclick=()=>{const t=val('aiNotes');document.getElementById('aiOutput').textContent=summarize(t)};
-document.getElementById('saveSupabase').onclick=async()=>{cfg={url:val('supabaseUrl'),anon:val('supabaseAnon'),facilityId:val('facilityId')};localStorage.setItem(cfgKey,JSON.stringify(cfg));initSupabase();await load()};
+document.getElementById('saveSupabase').onclick=async()=>{cfg={url:val('supabaseUrl')||defaultSupabase.url,anon:val('supabaseAnon')||defaultSupabase.anon,facilityId:val('facilityId')};localStorage.setItem(cfgKey,JSON.stringify(cfg));initSupabase();await load()};
 document.getElementById('clearSupabase').onclick=async()=>{localStorage.removeItem(cfgKey);sb=null;cfg={...defaultSupabase};initSupabase();await load()};
 document.getElementById('signInSupabase').onclick=async()=>{if(!sb){alert('Save Supabase URL and anon key first.');return}const {error}=await sb.auth.signInWithPassword({email:val('loginEmail'),password:val('loginPassword')});if(error) alert('Sign in failed: '+error.message); else {setConnectionStatus('signed in'); await load();}};
 function summarize(t){const lower=t.toLowerCase();const payer=/medicare advantage|medicare|hmo|medi-cal|kaiser|humana|united|blue shield/.exec(lower)?.[0]||'Not clearly stated';const dx=/(hip fracture|chf|wound|infection|stroke|pneumonia|deconditioning|joint replacement|iv antibiotics|ortho|cardiac)/.exec(lower)?.[0]||'Needs review';const skilled=[];if(/pt|ot|therapy|rehab/.test(lower))skilled.push('PT/OT therapy');if(/wound/.test(lower))skilled.push('Wound care');if(/iv|antibiotic/.test(lower))skilled.push('IV antibiotics');if(/chf|cardiac/.test(lower))skilled.push('Cardiac/skilled nursing monitoring');const missing=[];['h&p','therapy notes','pt notes','ot notes','mar','wound photos','iv orders','discharge summary','auth'].forEach(x=>{if(!lower.includes(x))missing.push(x)});const urgent=/today|tomorrow|asap|discharge/.test(lower);const priority=(/medicare|humana|united|kaiser|advantage/.test(lower)&&(/wound|iv|hip|ortho|rehab|chf|cardiac/.test(lower)||urgent))?'High':urgent?'Medium':'Medium/Review';return `Referral Summary:\n- Payer: ${cap(payer)}\n- Diagnosis: ${cap(dx)}\n- Skilled Need: ${skilled.join(', ')||'Not clearly stated'}\n- Admit Urgency: ${urgent?'High — discharge timing mentioned':'Not clearly stated'}\n- Missing Documents: ${missing.slice(0,6).join(', ')}\n- Recommended Priority: ${priority}\n- Suggested Follow-Up: Request missing clinical/auth documents and confirm bed/clinical review status.\n\nNote: This summary organizes information only and does not make clinical acceptance decisions.`}
