@@ -25,7 +25,10 @@
         <h1>Never lose a Medicare referral in the shuffle.</h1>
         <p class="lead">Manual-first referral intake, follow-up reminders, lost-reason tracking, high-value flags, and a daily leadership report.</p>
       </div>
-      <button id="seedBtn" class="secondary">Load fake test referrals</button>
+      <div class="hero-actions">
+        <button id="exportCsv">Export CSV</button>
+        <button id="seedBtn" class="secondary">Load fake test referrals</button>
+      </div>
     </section>
 
     <section class="metrics">
@@ -41,6 +44,7 @@
       <article id="intake" class="panel">
         <h2>Referral Intake</h2>
         <form id="intakeForm" class="form">
+          <input type="hidden" id="editId" />
           <label>Patient initials <input id="patient" placeholder="J.S." required /></label>
           <label>Referral source <input id="source" placeholder="Henry Mayo" required /></label>
           <label>Hospital contact <input id="contact" placeholder="Case manager name / phone" /></label>
@@ -55,9 +59,13 @@
           </label>
           <label>Assigned to <input id="assigned" placeholder="Admissions Coordinator" /></label>
           <label>Next follow-up <input id="followup" type="datetime-local" /></label>
+          <label>Response time minutes <input id="responseMinutes" type="number" min="0" value="0" /></label>
           <label class="wide">Missing documents <input id="missing" placeholder="PT notes, H&P, MAR, wound photos..." /></label>
           <label class="wide">Notes <textarea id="notes" placeholder="Waiting for auth..."></textarea></label>
-          <button class="wide">Save Referral</button>
+          <div class="wide form-actions">
+            <button id="saveReferralBtn">Save Referral</button>
+            <button id="cancelEdit" type="button" class="secondary hidden">Cancel edit</button>
+          </div>
         </form>
       </article>
 
